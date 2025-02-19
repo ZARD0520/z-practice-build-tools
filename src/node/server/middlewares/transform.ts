@@ -1,13 +1,17 @@
 import { NextHandleFunction } from "connect"
-import { isJSRequest, cleanUrl } from "../../utils"
+import { isJSRequest, isCSSRequest, cleanUrl, isImportRequest } from "../../utils"
 import { ServerContext } from "../index"
 import createDebug from "debug"
 
 const debug = createDebug("dev")
 
 export async function transformRequest(url: string, serverContext: ServerContext) {
-  const { pluginContainer } = serverContext
+  const { moduleGraph, pluginContainer } = serverContext
   url = cleanUrl(url)
+  let mod = await moduleGraph.getModuleByUrl(url)
+  if (mod && mod.transformResult) {
+    return mod.transformResult
+  }
   // 依次调用插件容器的resolveId、load、transform
   const resolvedResult = await pluginContainer.resolveId(url)
   let transformResult
@@ -23,6 +27,9 @@ export async function transformRequest(url: string, serverContext: ServerContext
       )
     }
   }
+  if (mod) {
+    mod.transformResult = transformResult
+  }
   return transformResult
 }
 
@@ -33,7 +40,7 @@ export function transformMiddleware(serverContext: ServerContext): NextHandleFun
     }
     const url = req.url
     debug("transformMiddleware: %s", url)
-    if (isJSRequest(url)) {
+    if (isJSRequest(url) || isCSSRequest(url) || isImportRequest(url)) {
       let result = await transformRequest(url, serverContext)
       if (!result) {
         return next()
