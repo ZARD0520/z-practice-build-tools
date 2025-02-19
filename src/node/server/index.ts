@@ -12,6 +12,7 @@ import { ModuleGraph } from '../ModuleGraph'
 import chokidar, { FSWatcher } from 'chokidar'
 import { createWebSocketServer } from '../ws'
 import { bindingHMREvents } from '../hmr'
+import { transformMiddleware } from './middlewares/transform'
 
 export interface ServerContext {
   root: string;
@@ -54,6 +55,7 @@ export async function startDevServer() {
     }
   }
 
+  app.use(transformMiddleware(serverContext))
   app.use(indexHtmlMiddware(serverContext))
   app.use(staticMiddleware())
 

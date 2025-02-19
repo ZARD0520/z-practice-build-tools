@@ -20,7 +20,7 @@ async function handleMessage(payload: any) {
       // 进行具体的模块更新
       payload.updates.forEach((update: Update) => {
         if (update.type === 'js-update') {
-          // ...
+          fetchUpdate(update)
         }
       })
       break
