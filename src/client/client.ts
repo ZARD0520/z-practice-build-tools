@@ -27,6 +27,13 @@ async function handleMessage(payload: any) {
   }
 }
 
+interface Update {
+  type: "js-update" | "css-update";
+  path: string;
+  acceptedPath: string;
+  timestamp: number;
+}
+
 interface HotModule {
   id: string
   callbacks: HotCallback[]
@@ -66,7 +73,7 @@ export const createHotContext = (ownerPath: string) => {
       // 这里仅考虑接受自身模块更新的情况
       // import.meta.hot.accept()
       if (typeof deps === "function" || !deps) {
-        acceptDeps([ownerPath], ([mod]) => deps && deps(mod));
+        acceptDeps([ownerPath], ([mod]: any) => deps && deps(mod));
       }
     },
     // 模块不再生效的回调
@@ -95,7 +102,7 @@ async function fetchUpdate({ path, timestamp }: Update) {
           path + `?t=${timestamp}${query ? `&${query}` : ""}`
         );
         moduleMap.set(dep, newMod);
-      } catch (e) {}
+      } catch (e) { }
     })
   );
 

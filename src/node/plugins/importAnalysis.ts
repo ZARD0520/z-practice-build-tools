@@ -8,6 +8,7 @@ import {
 import {
   cleanUrl,
   getShortName,
+  isInternalRequest,
   isJSRequest,
 } from "../utils"
 // magic-string 用来作字符串编辑
